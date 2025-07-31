@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista Ospiti</title>
+</head>
+<body>
+    <h1>Ospiti</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Cognome</th>
+        </tr>
+        {% for guest in guests %}
+        <tr>
+            <td>{{ guest[0] }}</td>
+            <td>{{ guest[1] }}</td>
+            <td>{{ guest[2] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
