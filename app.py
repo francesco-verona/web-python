@@ -5,30 +5,36 @@ import os
 app = Flask(__name__)
 
 
-@app.route('/')
-def index():
-    conn = psycopg2.connect("postgresql://franc:password@localhost:5432/example")
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM guests;")
-    rows = cur.fetchall()
-    cur.close()
-    conn.close()
-    return render_template('guests.html', guests=rows)
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://franc:password@localhost:5432/example",
+)
 
-@app.route('/add', methods=['GET','POST'])
+
+@app.route("/")
+def index():
+    """Render a list of all guests."""
+    with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT * FROM guests;")
+            rows = cur.fetchall()
+    return render_template("guests.html", guests=rows)
+
+@app.route("/add", methods=["GET", "POST"])
 def add():
-    if request.method == 'POST':
+    """Insert a new guest or display the form."""
+    if request.method == "POST":
         data = request.form
-        conn = psycopg2.connect("postgresql://franc:password@localhost:5432/example")
-        cur = conn.cursor()
-        cur.execute("INSERT INTO guests (firstname, lastname) VALUES (%s, %s);",
-                    (data['firstname'], data['lastname']))
-        conn.commit()
-        cur.close()
-        conn.close()
+        with psycopg2.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO guests (firstname, lastname) VALUES (%s, %s);",
+                    (data["firstname"], data["lastname"]),
+                )
+                conn.commit()
         return jsonify({"status": "success"})
     else:
-        return render_template('form.html')
+        return render_template("form.html")
 
 if __name__ == "__main__":
     # Modo di sviluppo: autoreload e debug attivi
