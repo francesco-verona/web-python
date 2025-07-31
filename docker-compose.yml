@@ -2,26 +2,28 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15
-    restart: always
+    image: postgres:16
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypass
-      POSTGRES_DB: mydb
+      POSTGRES_DB: example
+      POSTGRES_USER: franc
+      POSTGRES_PASSWORD: password
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - db_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./guests.sql:/docker-entrypoint-initdb.d/guests.sql
+    ports:
+      - "5432:5432"
 
   web:
     build: .
+    environment:
+      DATABASE_URL: postgresql://franc:password@db:5432/example
+      FLASK_APP: app.py
+      FLASK_ENV: development
     ports:
       - "5000:5000"
-    volumes:
-      - .:/app
-    environment:
-      - DATABASE_URL=postgresql://myuser:mypass@db:5432/mydb
     depends_on:
       - db
 
 volumes:
-  pgdata:
+  db_data:
